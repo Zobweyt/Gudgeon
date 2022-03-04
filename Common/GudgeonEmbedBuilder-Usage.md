@@ -1,10 +1,16 @@
 # Introduction
 
-The Gudgeon have the custom version of EmbedBuilder to include styles and make to code easier. It has everything that a regular one has, only styles are added.
-- To start sending style embeds, import [Gudgeon.Common.Styles](https://github.com/Zobweyt/Gudgeon/tree/master/Common/Styles)
+The Gudgeon have custom version of `EmbedBuilder` to include styles and make coding easier. It has everything that a regular one has, only styles are added.
+
+
+
+## Namespace
+
+The styles are located in [Gudgeon.Common.Styles](https://github.com/Zobweyt/Gudgeon/tree/master/Common/Styles).
+
 
 ## Examples
-Here is some examples of how to use them.
+Here is some examples of how to use styles.
 
 ### Sending a success style message
 ```cs
@@ -12,10 +18,9 @@ Here is some examples of how to use them.
 public async Task SendSuccessStyleAsync()
 {
   var embed = new GudgeonEmbedBuilder()
-    // if style name is not attached, then the name of style will be attached i.e. "Success".
+    // If style name is not attached, then the name of style will be attached i.e. "Success".
     .WithStyle(new SuccessStyle())
     .WithDescription("I made a success style message!")
-    // you do not need to make a lambda expression here as in the original builder.
     .WithFooter("Yay, an easy footer!")
     .Build();
     
@@ -23,7 +28,8 @@ public async Task SendSuccessStyleAsync()
 }
 ```
 
-### Expected output:
+<h3>Expected output:</h3>
+
 ![image](https://user-images.githubusercontent.com/98274273/156772963-a8821a78-115e-4efb-a25d-6ce34eaecd12.png)
 
 
@@ -34,10 +40,9 @@ public async Task SendSuccessStyleAsync()
 public async Task SendErrorStyleAsync()
 {
   var embed = new GudgeonEmbedBuilder()
-    // of course you can attach a name to the style.
+    // This way you can attach a name to the style.
     .WithStyle(new ErrorStyle(), "This is the name")
     .WithDescription("I made an error style message!")
-    // you do not need to make a lambda expression here as in the original builder.
     .WithFooter("Yay, an easy footer!")
     .Build();
     
@@ -45,5 +50,6 @@ public async Task SendErrorStyleAsync()
 }
 ```
 
-### Expected output:
+<h3>Expected output:</h3>
+
 ![image](https://user-images.githubusercontent.com/98274273/156773035-6b54efa5-3a5c-4661-96fa-d422c2146766.png)
