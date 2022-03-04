@@ -59,7 +59,7 @@ To get a local copy up and running, follow these simple steps.
 
 ## GudgeonEmbedBuilder
 
-The Gudgeon have a custom version EmbedBuilder. See [GudgeonEmbedBuilder.cs](https://github.com/Zobweyt/Gudgeon/blob/master/Common/GudgeonEmbedBuilder.cs) for more information.
+The Gudgeon have a custom version EmbedBuilder. See [GudgeonEmbedBuilder.cs](https://github.com/Zobweyt/Gudgeon/blob/master/Common/GudgeonEmbedBuilder.cs) and [GudgeonEmbedBuilder-Usage.md](https://github.com/Zobweyt/Gudgeon/blob/master/Common/GudgeonEmbedBuilder-Usage.md) for more information.
 
 
 
