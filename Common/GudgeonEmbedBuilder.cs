@@ -46,16 +46,17 @@ namespace Gudgeon.Common
         /// <summary>
         /// Attach a footer to the embed.
         /// </summary>
-        /// <param name="footer">The footer of the embed.</param>
+        /// <param name="footer">The footer text of the embed.</param>
+        /// <param name="iconUrl">The footer icon url of the embed.</param>
         /// <returns>A <see cref="GudgeonEmbedBuilder"/> with an attached footer.</returns>
-        public GudgeonEmbedBuilder WithFooter(string footer)
+        public GudgeonEmbedBuilder WithFooter(string footer, string? iconUrl = null)
         {
             if (footer?.Length > 2048)
             {
                 throw new ArgumentException(message: $"Footer length must be less than or equal to 2048.", paramName: nameof(footer));
             }
 
-            Builder.WithFooter(footer);
+            Builder.WithFooter(footer, iconUrl);
             return this;
         }
 
