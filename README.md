@@ -21,6 +21,7 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
+        <li><a href="#gudgeonembedbuilder">GudgeonEmbedBuilder</a></li>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
@@ -53,6 +54,13 @@ To get a local copy up and running, follow these simple steps.
    git clone https://github.com/Zobweyt/Gudgeon.git
    ```
 2. Configure `appsettings.json` and `appsettings.Development.json` files found in the Gudgeon directory
+
+
+
+## GudgeonEmbedBuilder
+
+The Gudgeon have a custom version EmbedBuilder. See [GudgeonEmbedBuilder.cs](https://github.com/Zobweyt/Gudgeon/blob/master/Common/GudgeonEmbedBuilder.cs) for more information.
+
 
 
 ## License
