@@ -2,7 +2,7 @@
 
 namespace Gudgeon.Common.Styles
 {
-    class SuccessStyle : EmbedStyle
+    internal class SuccessStyle : EmbedStyle
     {
         public override void ApplyStyle(string? name = null)
         {

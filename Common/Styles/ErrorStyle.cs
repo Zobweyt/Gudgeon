@@ -2,7 +2,7 @@
 
 namespace Gudgeon.Common.Styles
 {
-    class ErrorStyle : EmbedStyle
+    internal class ErrorStyle : EmbedStyle
     {
         public override void ApplyStyle(string? name = null)
         {

@@ -2,11 +2,11 @@
 
 namespace Gudgeon.Common.Styles
 {
-    abstract class EmbedStyle
+    internal abstract class EmbedStyle
     {
-        public static string? Name;
-        public static string? IconUrl;
-        public static Color Color;
+        public string? Name;
+        public string? IconUrl;
+        public Color Color;
 
         public abstract void ApplyStyle(string? name = null);
     }
