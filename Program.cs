@@ -1,15 +1,16 @@
 ﻿using Discord;
 using Discord.Addons.Hosting;
 using Discord.WebSocket;
+using Fergun.Interactive;
 using Gudgeon.Services;
 
 namespace Gudgeon
 {
-    class Program
+    internal class Program
     {
-        private static async Task Main(string[] args)
+        private static async Task Main()
         {
-            var host = Host.CreateDefaultBuilder(args)
+            var host = Host.CreateDefaultBuilder()
                 .ConfigureDiscordHost((context, config) =>
                 {
                     config.SocketConfig = new DiscordSocketConfig
@@ -36,7 +37,8 @@ namespace Gudgeon
                 {
                     services
                     .AddHostedService<InteractionHandler>()
-                    .AddHostedService<BotStatusService>();
+                    .AddHostedService<BotStatusService>()
+                    .AddTransient<InteractiveService>();
                 })
                 .Build();
 

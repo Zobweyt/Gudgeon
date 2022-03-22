@@ -62,10 +62,17 @@ csharp_space_around_binary_operators = before_and_after
 csharp_style_inlined_variable_declaration = true:suggestion
 
 # CS8601: Возможно, назначение-ссылка, допускающее значение NULL.
-dotnet_diagnostic.CS8601.severity = none
+dotnet_diagnostic.CS8601.severity = suggestion
 
 # CS8629: Тип значения, допускающего NULL, может быть NULL.
 dotnet_diagnostic.CS8629.severity = none
+
+# CS8618: Поле, не допускающее значения NULL, должно содержать значение, отличное от NULL, при выходе из конструктора. Возможно, стоит объявить поле как допускающее значения NULL.
+dotnet_diagnostic.CS8618.severity = suggestion
+
+# CS8509: Выражение switch обрабатывает не все возможные значения своего типа входных данных (оно не полное).
+dotnet_diagnostic.CS8509.severity = suggestion
+csharp_indent_labels = one_less_than_current
 
 [*.vb]
 #### Стили именования ####
