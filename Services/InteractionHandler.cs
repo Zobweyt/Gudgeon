@@ -4,6 +4,8 @@ using Discord.Addons.Hosting;
 using Discord.Addons.Hosting.Util;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Gudgeon.Common;
+using Gudgeon.Common.Styles;
 
 namespace Gudgeon.Services
 {
@@ -13,7 +15,6 @@ namespace Gudgeon.Services
         private readonly InteractionService _service;
         private readonly IHostEnvironment _environment;
         private readonly IConfiguration _configuration;
-        private readonly DiscordSocketClient _client;
 
         public InteractionHandler(DiscordSocketClient client, ILogger<DiscordClientService> logger, IServiceProvider provider, InteractionService service, IHostEnvironment environment, IConfiguration configuration) : base(client, logger)
         {
@@ -21,16 +22,106 @@ namespace Gudgeon.Services
             _service = service;
             _environment = environment;
             _configuration = configuration;
-            _client = client;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Client.InteractionCreated += HandleInteraction;
+            Client.ApplicationCommandCreated += Client_ApplicationCommandCreated;
+
+            _service.SlashCommandExecuted += SlashCommandExecuted;
+            _service.ComponentCommandExecuted += ComponentCommandExecuted;
+            _service.ModalCommandExecuted += ModalCommandExecuted;
 
             await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
             await Client.WaitForReadyAsync(stoppingToken);
-            
+            await RegisterCommands();
+        }
+
+        private Task Client_ApplicationCommandCreated(SocketApplicationCommand arg)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task HandleInteraction(SocketInteraction interaction)
+        {
+            try
+            {
+                var ctx = new SocketInteractionContext(Client, interaction);
+                await _service.ExecuteCommandAsync(ctx, _provider);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Exception occurred whilst attempting to handle interaction.");
+
+                if (interaction.Type == InteractionType.ApplicationCommand)
+                {
+                    var message = await interaction.GetOriginalResponseAsync();
+                    await message.DeleteAsync();
+                }
+            }
+        }
+
+        #region Error handling
+
+        private async Task SlashCommandExecuted(SlashCommandInfo command, IInteractionContext context, IResult result)
+        {
+            if (!result.IsSuccess)
+            {
+                switch (result.Error)
+                {
+                    case InteractionCommandError.UnmetPrecondition:
+                        await MissingPermissionsRespond(context, result.ErrorReason);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        private async Task ComponentCommandExecuted(ComponentCommandInfo command, IInteractionContext context, IResult result)
+        {
+            if (!result.IsSuccess)
+            {
+                switch (result.Error)
+                {
+                    case InteractionCommandError.UnmetPrecondition:
+                        await MissingPermissionsRespond(context, result.ErrorReason);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        private async Task ModalCommandExecuted(ModalCommandInfo command, IInteractionContext context, IResult result)
+        {
+            if (!result.IsSuccess)
+            {
+                switch (result.Error)
+                {
+                    case InteractionCommandError.UnmetPrecondition:
+                        await MissingPermissionsRespond(context, result.ErrorReason);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private async Task MissingPermissionsRespond(IInteractionContext context, string errorReason)
+        {
+            var embed = new GudgeonEmbedBuilder()
+                .WithStyle(new ErrorStyle(), "Missing permissions")
+                .WithDescription($"• {errorReason}")
+                .WithFooter($"{context.User.Username}#{context.User.Discriminator}")
+                .Build();
+
+            await context.Interaction.RespondAsync(embed: embed, ephemeral: true);
+        }
+
+        #endregion
+
+        private async Task RegisterCommands()
+        {
             if (_environment.IsDevelopment())
             {
                 await _service.RegisterCommandsToGuildAsync(_configuration.GetValue<ulong>("DevGuild"));
@@ -39,26 +130,6 @@ namespace Gudgeon.Services
             {
                 await _service.RegisterCommandsGloballyAsync();
             }
-
-        }
-        private async Task HandleInteraction(SocketInteraction arg)
-        {
-            try
-            {
-                var ctx = new SocketInteractionContext(Client, arg);
-                await _service.ExecuteCommandAsync(ctx, _provider);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "Exception occurred whilst attempting to handle interaction.");
-
-                if (arg.Type == InteractionType.ApplicationCommand)
-                {
-                    var msg = await arg.GetOriginalResponseAsync();
-                    await msg.DeleteAsync();
-                }
-            }
         }
     }
-
 }
