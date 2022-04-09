@@ -64,4 +64,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-✉ zobweyt@gmail.com
+📧 zobweyt@gmail.com
