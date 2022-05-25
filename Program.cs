@@ -37,7 +37,6 @@ namespace Gudgeon
                 {
                     services
                     .AddHostedService<InteractionHandler>()
-                    .AddHostedService<BotStatusService>()
                     .AddTransient<InteractiveService>();
                 })
                 .Build();
