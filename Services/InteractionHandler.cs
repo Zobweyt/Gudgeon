@@ -1,7 +1,5 @@
-﻿using System.Reflection;
-using Discord;
+﻿using Discord;
 using Discord.Addons.Hosting;
-using Discord.Addons.Hosting.Util;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Gudgeon.Common;
@@ -9,50 +7,39 @@ using Gudgeon.Common.Styles;
 
 namespace Gudgeon.Services
 {
-    internal class InteractionHandler : DiscordClientService
+    internal sealed partial class InteractionHandler : DiscordClientService
     {
-        private readonly IServiceProvider _provider;
-        private readonly InteractionService _service;
-        private readonly IHostEnvironment _environment;
-        private readonly IConfiguration _configuration;
-
-        public InteractionHandler(DiscordSocketClient client, ILogger<DiscordClientService> logger, IServiceProvider provider, InteractionService service, IHostEnvironment environment, IConfiguration configuration) : base(client, logger)
+        private static readonly string?[] ErrorEmbedNames =
         {
-            _provider = provider;
-            _service = service;
-            _environment = environment;
-            _configuration = configuration;
-        }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+            null, // UnknownCommand
+            "Convert Failed",
+            null, // BadArgs
+            "Exception",
+            null, // Unsuccessful
+            "Unmet Precondition",
+            null, // ParseFailed
+        };
+        private static readonly string?[] ErrorEmbedFooters =
         {
-            Client.InteractionCreated += HandleInteraction;
-            Client.ApplicationCommandCreated += Client_ApplicationCommandCreated;
+            null, // UnknownCommand
+            "Please check the provided parameters", // ConvertFailed
+            null, // BadArgs
+            "If that keeps happening again, please contact us by using /feedback", // Exception
+            null, // Unsuccessful
+            null, // Unmet Precondition
+            null, // ParseFailed
+        };
 
-            _service.SlashCommandExecuted += SlashCommandExecuted;
-            _service.ComponentCommandExecuted += ComponentCommandExecuted;
-            _service.ModalCommandExecuted += ModalCommandExecuted;
-
-            await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
-            await Client.WaitForReadyAsync(stoppingToken);
-            await RegisterCommands();
-        }
-
-        private Task Client_ApplicationCommandCreated(SocketApplicationCommand arg)
-        {
-            throw new NotImplementedException();
-        }
-
-        private async Task HandleInteraction(SocketInteraction interaction)
+        private async Task InteractionCreatedAsync(SocketInteraction interaction)
         {
             try
             {
-                var ctx = new SocketInteractionContext(Client, interaction);
-                await _service.ExecuteCommandAsync(ctx, _provider);
+                var context = new SocketInteractionContext(Client, interaction);
+                await _service.ExecuteCommandAsync(context, _provider);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                Logger.LogError(ex, "Exception occurred whilst attempting to handle interaction.");
+                Logger.LogError(exception, "Exception occurred whilst attempting to handle interaction.");
 
                 if (interaction.Type == InteractionType.ApplicationCommand)
                 {
@@ -61,75 +48,29 @@ namespace Gudgeon.Services
                 }
             }
         }
+        private async Task InteractionExecutedAsync(ICommandInfo command, IInteractionContext context, IResult result)
+        {
+            if (!result.IsSuccess)
+            {
+                int error = (int)result.Error;
+                string? name = ErrorEmbedNames[error];
 
-        #region Error handling
-
-        private async Task SlashCommandExecuted(SlashCommandInfo command, IInteractionContext context, IResult result)
-        {
-            if (!result.IsSuccess)
-            {
-                switch (result.Error)
+                if (name != null)
                 {
-                    case InteractionCommandError.UnmetPrecondition:
-                        await MissingPermissionsRespond(context, result.ErrorReason);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        private async Task ComponentCommandExecuted(ComponentCommandInfo command, IInteractionContext context, IResult result)
-        {
-            if (!result.IsSuccess)
-            {
-                switch (result.Error)
-                {
-                    case InteractionCommandError.UnmetPrecondition:
-                        await MissingPermissionsRespond(context, result.ErrorReason);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        private async Task ModalCommandExecuted(ModalCommandInfo command, IInteractionContext context, IResult result)
-        {
-            if (!result.IsSuccess)
-            {
-                switch (result.Error)
-                {
-                    case InteractionCommandError.UnmetPrecondition:
-                        await MissingPermissionsRespond(context, result.ErrorReason);
-                        break;
-                    default:
-                        break;
+                    await ErrorResponseAsync(context, name, result.ErrorReason, ErrorEmbedFooters[error]);
                 }
             }
         }
 
-        private async Task MissingPermissionsRespond(IInteractionContext context, string errorReason)
+        private async Task ErrorResponseAsync(IInteractionContext context, string name, string description, string? footer = null)
         {
             var embed = new GudgeonEmbedBuilder()
-                .WithStyle(new ErrorStyle(), "Missing permissions")
-                .WithDescription($"• {errorReason}")
-                .WithFooter($"{context.User.Username}#{context.User.Discriminator}")
+                .WithStyle(new ErrorStyle(), name)
+                .WithDescription(description)
+                .WithFooter(footer)
                 .Build();
 
             await context.Interaction.RespondAsync(embed: embed, ephemeral: true);
-        }
-
-        #endregion
-
-        private async Task RegisterCommands()
-        {
-            if (_environment.IsDevelopment())
-            {
-                await _service.RegisterCommandsToGuildAsync(_configuration.GetValue<ulong>("DevGuild"));
-            }
-            else
-            {
-                await _service.RegisterCommandsGloballyAsync();
-            }
         }
     }
 }
